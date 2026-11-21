@@ -1,0 +1,94 @@
+﻿{% extends 'farm/base.html' %}
+{% block title %}My Profile & Preferences – Kisan Connect{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Buyer Profile & Preferences</h1>
+    <p style="color:#757575;font-size:.9rem;margin-top:4px;">Manage your business information and crop procurement preferences.</p>
+  </div>
+  <a href="{% url 'home' %}" class="btn btn-secondary">← Back to Home</a>
+</div>
+
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:24px;align-items:flex-start;">
+  <!-- Edit Profile Form -->
+  <div class="card">
+    <h2 style="font-size:1.2rem;color:#1b5e20;margin-bottom:18px;">Edit Profile Information</h2>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="form-group">
+        <label for="{{ form.name.id_for_label }}">Business / Trader Name *</label>
+        {{ form.name }}
+        {% if form.name.errors %}
+        <ul class="errorlist">{% for e in form.name.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="form-group">
+          <label for="{{ form.phone.id_for_label }}">Phone Number</label>
+          {{ form.phone }}
+          {% if form.phone.errors %}
+          <ul class="errorlist">{% for e in form.phone.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.location.id_for_label }}">Operating Location / City</label>
+          {{ form.location }}
+          {% if form.location.errors %}
+          <ul class="errorlist">{% for e in form.location.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.preferred_crops.id_for_label }}">Target Preferred Crops</label>
+        {{ form.preferred_crops }}
+        <p class="help-text">Enter comma-separated crops (e.g. <code>Wheat, Basmati Rice, Mustard, Cotton</code>). Your dashboard will recommend matching crops based on these.</p>
+        {% if form.preferred_crops.errors %}
+        <ul class="errorlist">{% for e in form.preferred_crops.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.budget.id_for_label }}">Procurement Budget (INR)</label>
+        {{ form.budget }}
+        <p class="help-text">Approximate total purchasing budget.</p>
+        {% if form.budget.errors %}
+        <ul class="errorlist">{% for e in form.budget.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:24px;">
+        <button type="submit" class="btn btn-primary" style="padding:10px 24px;">💾 Save Profile</button>
+        <a href="{% url 'home' %}" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Profile Summary Sidebar -->
+  <div>
+    <div class="card">
+      <h3 style="font-size:1.05rem;color:#1b5e20;margin-bottom:12px;">Account Details</h3>
+      <div class="detail-grid" style="grid-template-columns:1fr;gap:10px;">
+        <div class="detail-item"><label>Username</label><p>{{ user.username }}</p></div>
+        <div class="detail-item"><label>Email</label><p>{{ user.email }}</p></div>
+        <div class="detail-item"><label>Assigned Role</label><p><span class="badge badge-blue">Buyer</span></p></div>
+      </div>
+
+      <hr style="border:none;border-top:1px solid var(--border);margin:18px 0 14px 0;">
+
+      <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 16px;">
+          🚪 Logout
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,53 @@
+﻿{% extends 'farm/base.html' %}
+{% block title %}Farmers – Kisan Connect{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">👨‍🌾 Farmers</h1>
+  <a href="{% url 'farmer_create' %}" class="btn btn-primary">+ Add Farmer</a>
+</div>
+
+<form method="get" class="search-bar">
+  <input type="text" name="q" value="{{ q }}" placeholder="Search by name, district, state or email…">
+  <button type="submit" class="btn btn-primary">Search</button>
+  {% if q %}<a href="{% url 'farmer_list' %}" class="btn btn-secondary">Clear</a>{% endif %}
+</form>
+
+<div class="card" style="padding:0;overflow:hidden;">
+  {% if farmers %}
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th>Name</th><th>Email</th><th>Phone</th><th>District</th><th>State</th><th>Farm Size</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for farmer in farmers %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td><a href="{% url 'farmer_detail' farmer.pk %}"><strong>{{ farmer.name }}</strong></a></td>
+          <td>{{ farmer.email }}</td>
+          <td>{{ farmer.phone }}</td>
+          <td>{{ farmer.district|default:"-" }}</td>
+          <td>{{ farmer.state|default:"-" }}</td>
+          <td>{{ farmer.farm_size }} acres</td>
+          <td style="white-space:nowrap;">
+            <a href="{% url 'farmer_update' farmer.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+            <a href="{% url 'farmer_delete' farmer.pk %}" class="btn btn-danger btn-sm">Delete</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="icon">👨‍🌾</div>
+    <p>{% if q %}No farmers found for "{{ q }}"{% else %}No farmers added yet{% endif %}</p>
+    <a href="{% url 'farmer_create' %}" class="btn btn-primary">Add First Farmer</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+

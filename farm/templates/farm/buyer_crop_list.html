@@ -1,0 +1,101 @@
+﻿{% extends 'farm/base.html' %}
+{% block title %}Browse Crops – Kisan Connect{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">🌾 Available Crops for Procurement</h1>
+    <p style="color:#757575;font-size:.9rem;margin-top:4px;">Browse crops directly listed by verified farmers and submit purchase enquiries.</p>
+  </div>
+  <a href="{% url 'buyer_enquiry_list' %}" class="btn btn-secondary">My Enquiries</a>
+</div>
+
+<!-- Search and Filter Bar -->
+<form method="get" class="search-bar" style="flex-wrap:wrap;max-width:100%;gap:12px;">
+  <input type="text" name="q" value="{{ q }}" placeholder="Search crop or farmer..." style="min-width:200px;">
+  
+  <select name="state" style="min-width:160px;">
+    <option value="">All States</option>
+    {% for s in states %}
+    <option value="{{ s }}" {% if state == s %}selected{% endif %}>{{ s }}</option>
+    {% endfor %}
+  </select>
+
+  <select name="district" style="min-width:160px;">
+    <option value="">All Districts</option>
+    {% for d in districts %}
+    <option value="{{ d }}" {% if district == d %}selected{% endif %}>{{ d }}</option>
+    {% endfor %}
+  </select>
+
+  <select name="season" style="min-width:140px;">
+    <option value="">All Seasons</option>
+    {% for val, label in season_choices %}
+    <option value="{{ val }}" {% if season == val %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+
+  <div style="display:flex;gap:8px;">
+    <button type="submit" class="btn btn-primary">Filter</button>
+    {% if q or season or state or district %}
+    <a href="{% url 'buyer_crop_list' %}" class="btn btn-secondary">Clear</a>
+    {% endif %}
+  </div>
+</form>
+
+<div class="card" style="padding:0;overflow:hidden;">
+  {% if crops %}
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Crop Name</th>
+          <th>Farmer</th>
+          <th>District</th>
+          <th>State</th>
+          <th>Season</th>
+          <th>Planted Area</th>
+          <th>Expected Yield</th>
+          <th>Expected Price</th>
+          <th>Expected Harvest</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for crop in crops %}
+        <tr>
+          <td style="color:#9e9e9e;font-size:.82rem;">{{ forloop.counter }}</td>
+          <td><strong style="font-size:1.02rem;color:#1b5e20;">{{ crop.name }}</strong></td>
+          <td><strong>{{ crop.farmer.name }}</strong></td>
+          <td>{{ crop.farmer.district|default:"-" }}</td>
+          <td>{{ crop.farmer.state|default:"-" }}</td>
+          <td>
+            <span class="badge {% if crop.season == 'kharif' %}badge-green{% elif crop.season == 'rabi' %}badge-blue{% elif crop.season == 'zaid' %}badge-yellow{% else %}badge-orange{% endif %}">
+              {{ crop.get_season_display }}
+            </span>
+          </td>
+          <td>{{ crop.area_planted }} acres</td>
+          <td style="font-weight:700;color:#2e7d32;">{{ crop.expected_yield }} Q</td>
+          <td style="font-weight:700;color:#1b5e20;">Rs. {{ crop.expected_price }} / Q</td>
+          <td style="font-size:.88rem;color:#616161;">{{ crop.harvest_date|date:"d M Y" }}</td>
+          <td style="white-space:nowrap;">
+            <a href="{% url 'submit_enquiry' crop.pk %}" class="btn btn-primary btn-sm">Send Enquiry</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="icon">🌾</div>
+    <p>{% if q or season or state or district %}No crops match your current search filters.{% else %}No crops are currently listed by farmers.{% endif %}</p>
+    {% if q or season or state or district %}
+    <a href="{% url 'buyer_crop_list' %}" class="btn btn-secondary">Reset Search Filters</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+

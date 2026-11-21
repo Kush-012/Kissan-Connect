@@ -1,0 +1,76 @@
+﻿{% extends 'farm/base.html' %}
+{% block title %}{{ crop.name }} – Kisan Connect{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">{{ crop.name }}</h1>
+  <div style="display:flex;gap:8px;">
+    <a href="{% url 'crop_update' crop.pk %}" class="btn btn-secondary">Edit</a>
+    <a href="{% url 'crop_delete' crop.pk %}" class="btn btn-danger">Delete</a>
+    <a href="{% url 'crop_list' %}" class="btn btn-secondary">← Back</a>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:24px;">
+  <div class="detail-grid">
+    <div class="detail-item"><label>Farmer</label><p><a href="{% url 'farmer_detail' crop.farmer.pk %}">{{ crop.farmer.name }}</a></p></div>
+    <div class="detail-item"><label>Season</label><p><span class="badge badge-green">{{ crop.get_season_display }}</span></p></div>
+    <div class="detail-item"><label>Area Planted</label><p>{{ crop.area_planted }} acres</p></div>
+    <div class="detail-item"><label>Expected Yield</label><p>{{ crop.expected_yield }} quintals</p></div>
+    <div class="detail-item"><label>Expected Price</label><p style="font-weight:700;color:#2e7d32;font-size:1.1rem;">Rs. {{ crop.expected_price }} per Quintal</p></div>
+    <div class="detail-item"><label>Harvest Date</label><p>{{ crop.harvest_date|date:"d M Y" }}</p></div>
+    <div class="detail-item"><label>Added On</label><p>{{ crop.created_at|date:"d M Y" }}</p></div>
+  </div>
+</div>
+
+<!-- Enquiries Received for This Crop -->
+<div class="page-header" style="margin-top:8px;">
+  <h2 style="font-size:1.2rem;color:#1b5e20;">📬 Purchase Enquiries for {{ crop.name }}</h2>
+  <a href="{% url 'operator_enquiry_list' %}" class="btn btn-secondary btn-sm">All Enquiries →</a>
+</div>
+
+<div class="card" style="padding:0;overflow:hidden;">
+  {% if enquiries %}
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Buyer</th>
+          <th>Required Qty</th>
+          <th>Offered Price</th>
+          <th>Status</th>
+          <th>Message</th>
+          <th>Date</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for enq in enquiries %}
+        <tr>
+          <td>#{{ enq.id }}</td>
+          <td><strong>{{ enq.buyer.username }}</strong></td>
+          <td>{{ enq.required_quantity }} {{ enq.quantity_unit }}</td>
+          <td style="font-weight:700;color:#2e7d32;">Rs. {{ enq.offered_price_per_quintal }} / Q</td>
+          <td><span class="badge badge-{{ enq.status }}">{{ enq.get_status_display }}</span></td>
+          <td style="color:#616161;font-size:.85rem;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+            {{ enq.message|default:"-" }}
+          </td>
+          <td style="font-size:.85rem;color:#757575;">{{ enq.created_at|date:"d M Y" }}</td>
+          <td>
+            <a href="{% url 'operator_enquiry_detail' enq.pk %}" class="btn btn-secondary btn-sm">Review & Update</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="icon">📬</div>
+    <p>No purchase enquiries have been received for this crop yet.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+

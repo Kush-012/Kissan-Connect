@@ -1,0 +1,130 @@
+﻿{% extends 'farm/base.html' %}
+{% block title %}Crops – Kisan Connect{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">🌱 Crops</h1>
+    <p style="color:#757575;font-size:.9rem;margin-top:4px;">Manage registered crops and buyer purchase enquiries.</p>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center;">
+    <a href="{% url 'operator_enquiry_list' %}" class="btn btn-secondary" style="background:#fff3e0;color:#e65100;border:1px solid #ffe0b2;font-weight:600;">
+      📬 Crop Enquiries {% if pending_enquiries_count > 0 %}<span style="background:#e65100;color:#fff;padding:2px 7px;border-radius:10px;font-size:.75rem;margin-left:4px;">{{ pending_enquiries_count }} pending</span>{% endif %}
+    </a>
+    <a href="{% url 'crop_create' %}" class="btn btn-primary">+ Add Crop</a>
+  </div>
+</div>
+
+<form method="get" class="search-bar">
+  <input type="text" name="q" value="{{ q }}" placeholder="Search by crop or farmer name…">
+  <select name="season">
+    <option value="">All Seasons</option>
+    {% for val, label in season_choices %}
+    <option value="{{ val }}" {% if season == val %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit" class="btn btn-primary">Filter</button>
+  {% if q or season %}<a href="{% url 'crop_list' %}" class="btn btn-secondary">Clear</a>{% endif %}
+</form>
+
+<div class="card" style="padding:0;overflow:hidden;margin-bottom:28px;">
+  {% if crops %}
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr><th>#</th><th>Crop</th><th>Farmer</th><th>Season</th><th>Area</th><th>Yield</th><th>Expected Price</th><th>Enquiries</th><th>Harvest</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for crop in crops %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td><a href="{% url 'crop_detail' crop.pk %}"><strong>{{ crop.name }}</strong></a></td>
+          <td><a href="{% url 'farmer_detail' crop.farmer.pk %}">{{ crop.farmer.name }}</a></td>
+          <td>
+            <span class="badge {% if crop.season == 'kharif' %}badge-green{% elif crop.season == 'rabi' %}badge-blue{% elif crop.season == 'zaid' %}badge-yellow{% else %}badge-orange{% endif %}">
+              {{ crop.get_season_display }}
+            </span>
+          </td>
+          <td>{{ crop.area_planted }} ac</td>
+          <td>{{ crop.expected_yield }} Q</td>
+          <td style="font-weight:700;color:#2e7d32;">Rs. {{ crop.expected_price }} / Q</td>
+          <td>
+            {% with count=crop.purchase_enquiries.count %}
+              {% if count > 0 %}
+                <a href="{% url 'operator_enquiry_list' %}?q={{ crop.name }}" style="background:#e8f5e9;color:#2e7d32;padding:3px 8px;border-radius:12px;font-size:.8rem;font-weight:700;text-decoration:none;">
+                  {{ count }} enquir{{ count|pluralize:"y,ies" }}
+                </a>
+              {% else %}
+                <span style="color:#bdbdbd;font-size:.85rem;">0</span>
+              {% endif %}
+            {% endwith %}
+          </td>
+          <td>{{ crop.harvest_date|date:"d M Y" }}</td>
+          <td style="white-space:nowrap;">
+            <a href="{% url 'crop_detail' crop.pk %}" class="btn btn-secondary btn-sm">View</a>
+            <a href="{% url 'crop_update' crop.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+            <a href="{% url 'crop_delete' crop.pk %}" class="btn btn-danger btn-sm">Delete</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="icon">🌱</div>
+    <p>{% if q or season %}No crops found for the selected filters{% else %}No crops added yet{% endif %}</p>
+    <a href="{% url 'crop_create' %}" class="btn btn-primary">Add First Crop</a>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Enquiries under Crops Section -->
+<div class="card">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+    <div>
+      <h2 style="font-size:1.15rem;color:#1b5e20;">📬 Purchase Enquiries for Crops</h2>
+      <p style="color:#757575;font-size:.85rem;margin-top:2px;">Recent procurement offers submitted by registered buyers.</p>
+    </div>
+    <a href="{% url 'operator_enquiry_list' %}" style="font-size:.85rem;font-weight:600;">View all ({{ total_enquiries_count }}) →</a>
+  </div>
+
+  {% if recent_enquiries %}
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Buyer</th>
+          <th>Crop</th>
+          <th>Farmer</th>
+          <th>Required Qty</th>
+          <th>Offered Price</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for enq in recent_enquiries %}
+        <tr>
+          <td>#{{ enq.id }}</td>
+          <td><strong>{{ enq.buyer.username }}</strong></td>
+          <td><a href="{% url 'crop_detail' enq.crop.pk %}"><strong>{{ enq.crop.name }}</strong></a></td>
+          <td>{{ enq.farmer.name }}</td>
+          <td>{{ enq.required_quantity }} {{ enq.quantity_unit }}</td>
+          <td style="font-weight:700;color:#2e7d32;">Rs. {{ enq.offered_price_per_quintal }} / Q</td>
+          <td><span class="badge badge-{{ enq.status }}">{{ enq.get_status_display }}</span></td>
+          <td style="font-size:.85rem;color:#757575;">{{ enq.created_at|date:"d M Y" }}</td>
+          <td><a href="{% url 'operator_enquiry_detail' enq.pk %}" class="btn btn-secondary btn-sm">Review</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p style="color:#9e9e9e;font-size:.9rem;padding:8px 0;">No purchase enquiries received yet for registered crops.</p>
+  {% endif %}
+</div>
+{% endblock %}
+

@@ -1,0 +1,122 @@
+{% extends 'farm/base.html' %}
+{% block title %}Market Crop Prices – Kisan Connect{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">Market Crop Prices</h1>
+  <span style="font-size:.82rem;color:var(--emerald-dark);background:var(--sage);padding:6px 14px;border-radius:16px;border:1px solid var(--border);font-weight:600;">
+    Wholesale APMC Market Rates
+  </span>
+</div>
+
+<div class="card" style="margin-bottom:20px;">
+  <form method="get" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+    <div style="flex:1;min-width:180px;">
+      <label style="display:block;font-size:.85rem;font-weight:600;color:#424242;margin-bottom:5px;">Commodity</label>
+      <input type="text" name="commodity" value="{{ commodity }}"
+        placeholder="e.g. Wheat, Rice, Tomato, Potato"
+        style="width:100%;padding:10px 14px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:.9rem;">
+    </div>
+    <div style="flex:1;min-width:160px;">
+      <label style="display:block;font-size:.85rem;font-weight:600;color:#424242;margin-bottom:5px;">State</label>
+      <input type="text" name="state" value="{{ state }}"
+        placeholder="e.g. Punjab, Maharashtra"
+        style="width:100%;padding:10px 14px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:.9rem;">
+    </div>
+    <div style="flex:1;min-width:160px;">
+      <label style="display:block;font-size:.85rem;font-weight:600;color:#424242;margin-bottom:5px;">District</label>
+      <input type="text" name="district" value="{{ district }}"
+        placeholder="e.g. Amritsar, Pune, Thane"
+        style="width:100%;padding:10px 14px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:.9rem;">
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button type="submit" class="btn btn-primary">Search</button>
+      {% if commodity or state or district %}
+      <a href="{% url 'market_crop_prices' %}" class="btn btn-secondary">Clear</a>
+      {% endif %}
+    </div>
+  </form>
+</div>
+
+{% if error %}
+<div class="card" style="border-left:4px solid #c62828;background:#ffebee;margin-bottom:20px;">
+  <p style="color:#c62828;font-weight:700;">Market Service Notice</p>
+  <p style="color:#424242;font-size:.92rem;margin-top:4px;">{{ error }}</p>
+  <div style="margin-top:12px;">
+    <a href="{% url 'market_crop_prices' %}" class="btn btn-secondary btn-sm">Retry</a>
+  </div>
+</div>
+{% endif %}
+
+{% if records %}
+
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+  <p style="color:#616161;font-size:.9rem;">
+    Showing <strong>{{ records|length }}</strong> of <strong>{{ total }}</strong> live records
+    {% if commodity %}for <strong>"{{ commodity }}"</strong>{% endif %}
+    {% if district %}in District <strong>{{ district }}</strong>{% endif %}
+    {% if state %}in State <strong>{{ state }}</strong>{% endif %}
+  </p>
+  <p style="color:#757575;font-size:.85rem;">Page {{ page }} of {{ total_pages }}</p>
+</div>
+
+<div style="background:#f1f8e9;border-left:4px solid #2e7d32;padding:10px 16px;border-radius:6px;margin-bottom:16px;font-size:.88rem;color:#1b5e20;">
+  <strong>Note:</strong> All prices are quoted per <strong>1 Quintal (100 kg)</strong>.{% if report_date %} Latest arrival date: <strong>{{ report_date }}</strong>.{% endif %}
+</div>
+
+<div class="card" style="padding:0;overflow:hidden;">
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Commodity</th>
+          <th>Market / Mandi</th>
+          <th>District</th>
+          <th>State</th>
+          <th>Min Price</th>
+          <th>Max Price</th>
+          <th>Modal Price</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for rec in records %}
+        <tr>
+          <td style="color:#9e9e9e;font-size:.82rem;">{{ forloop.counter }}</td>
+          <td><strong>{{ rec.commodity|default:"-" }}</strong></td>
+          <td>{{ rec.market|default:"-" }}</td>
+          <td>{{ rec.district|default:"-" }}</td>
+          <td>{{ rec.state|default:"-" }}</td>
+          <td style="color:#c62828;font-weight:600;">Rs. {{ rec.min_price|default:"-" }}</td>
+          <td style="color:#2e7d32;font-weight:600;">Rs. {{ rec.max_price|default:"-" }}</td>
+          <td style="color:#1565c0;font-weight:700;font-size:1rem;">Rs. {{ rec.modal_price|default:"-" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-top:20px;">
+  {% if has_prev %}
+  <a href="?commodity={{ commodity }}&state={{ state }}&district={{ district }}&page={{ prev_page }}" class="btn btn-secondary">← Previous</a>
+  {% endif %}
+
+  <span style="color:#757575;font-size:.9rem;">Page {{ page }} of {{ total_pages }}</span>
+
+  {% if has_next %}
+  <a href="?commodity={{ commodity }}&state={{ state }}&district={{ district }}&page={{ next_page }}" class="btn btn-primary">Next →</a>
+  {% endif %}
+</div>
+
+{% elif not error %}
+
+<div class="card">
+  <div class="empty-state">
+    <p>No records found for the selected query.</p>
+    <a href="{% url 'market_crop_prices' %}" class="btn btn-secondary">Reset Filters</a>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

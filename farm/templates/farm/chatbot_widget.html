@@ -1,0 +1,893 @@
+{% load static %}
+<!-- Kisan Connect Floating Circular AI Chatbot Widget (Powered by Groq) -->
+<div id="fmChatbotContainer" class="fm-chatbot-wrapper">
+  <!-- Floating Circle Trigger Button -->
+  <button id="fmChatTrigger" class="fm-chat-circle-btn" type="button" aria-label="Open Kisan AI Assistant" title="Ask Kisan AI">
+    <div class="fm-chat-badge-pulse" id="fmChatBadgePulse"></div>
+    <span class="fm-chat-icon fm-icon-open">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        <path d="M8 10h.01"></path>
+        <path d="M12 10h.01"></path>
+        <path d="M16 10h.01"></path>
+      </svg>
+    </span>
+    <span class="fm-chat-icon fm-icon-close" style="display: none;">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </span>
+    <span class="fm-chat-tooltip">Ask Kisan AI</span>
+  </button>
+
+  <!-- Floating Chat Window Dialog -->
+  <div id="fmChatWindow" class="fm-chat-dialog" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="fmChatTitle">
+    <!-- Header -->
+    <div class="fm-chat-header">
+      <div class="fm-chat-header-info">
+        <div class="fm-chat-avatar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a3 3 0 0 0-3 3v1H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-3V5a3 3 0 0 0-3-3z"></path>
+            <circle cx="9" cy="13" r="1"></circle>
+            <circle cx="15" cy="13" r="1"></circle>
+          </svg>
+          <span class="fm-online-dot" title="Online"></span>
+        </div>
+        <div class="fm-chat-title-group">
+          <div class="fm-chat-title-row">
+            <h3 id="fmChatTitle">Kisan AI</h3>
+            <span class="fm-badge-status">Online</span>
+          </div>
+        </div>
+      </div>
+      <div class="fm-chat-header-actions">
+        <button id="fmChatClearBtn" type="button" class="fm-header-icon-btn" title="Clear chat history" aria-label="Clear chat">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="1 4 1 10 7 10"></polyline>
+            <polyline points="23 20 23 14 17 14"></polyline>
+            <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+          </svg>
+        </button>
+        <button id="fmChatCloseBtn" type="button" class="fm-header-icon-btn" title="Close chat" aria-label="Close chat">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Message History Body -->
+    <div id="fmChatMessages" class="fm-chat-messages">
+      <!-- Welcome Card -->
+      <div class="fm-message fm-message-bot">
+        <div class="fm-message-avatar">🌱</div>
+        <div class="fm-message-content">
+          <div class="fm-message-bubble">
+            <p><strong>Namaste! Welcome to Kisan Connect.</strong></p>
+            <p style="margin-top: 4px;">How can I help you today?</p>
+          </div>
+          <span class="fm-message-time">Just now</span>
+        </div>
+      </div>
+
+      <!-- Quick Suggestion Chips -->
+      <div id="fmSuggestions" class="fm-suggestions-container">
+        <div class="fm-suggestions-label">Popular Questions:</div>
+        <div class="fm-chips-grid">
+          <button type="button" class="fm-chip-btn" data-query="What crops are currently available on this website?">🌾 Available Crops</button>
+          <button type="button" class="fm-chip-btn" data-query="How does Market crop price discovery work?">📈 Market Crop Prices</button>
+          <button type="button" class="fm-chip-btn" data-query="How can a buyer register and submit a purchase enquiry?">🛒 How to Buy</button>
+          <button type="button" class="fm-chip-btn" data-query="Who are the registered farmers and what are their locations?">👨‍🌾 Registered Farmers</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Typing Indicator -->
+    <div id="fmTypingIndicator" class="fm-typing-row" style="display: none;">
+      <div class="fm-message-avatar">🌱</div>
+      <div class="fm-typing-bubble">
+        <span class="fm-dot"></span>
+        <span class="fm-dot"></span>
+        <span class="fm-dot"></span>
+      </div>
+    </div>
+
+    <!-- Footer Input Bar -->
+    <form id="fmChatForm" class="fm-chat-footer" autocomplete="off">
+      {% csrf_token %}
+      <div class="fm-input-wrapper">
+        <textarea
+          id="fmChatInput"
+          class="fm-chat-input"
+          placeholder="Ask about crops, market prices, enquiries..."
+          rows="1"
+          maxlength="1000"
+          required
+        ></textarea>
+        <button id="fmSendBtn" type="submit" class="fm-send-btn" aria-label="Send message" title="Send message">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+  /* ══════════════════════════════════════════════════════════════
+     FARMER MARKET CIRCULAR CHATBOT STYLES
+     ══════════════════════════════════════════════════════════════ */
+  .fm-chatbot-wrapper {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 99999;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  /* ── Circular Trigger Floating Action Button ──────────────── */
+  .fm-chat-circle-btn {
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0E2A22 0%, #164436 45%, #1E824C 100%);
+    border: 2px solid rgba(216, 165, 64, 0.45);
+    color: #ffffff;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(14, 42, 34, 0.35), 0 2px 6px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    outline: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .fm-chat-circle-btn:hover {
+    transform: translateY(-3px) scale(1.06);
+    box-shadow: 0 14px 32px rgba(14, 42, 34, 0.45), 0 0 16px rgba(216, 165, 64, 0.4);
+    border-color: #D8A540;
+  }
+
+  .fm-chat-circle-btn:active {
+    transform: translateY(1px) scale(0.96);
+  }
+
+  .fm-chat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+  }
+
+  /* Pulsing Attention Badge */
+  .fm-chat-badge-pulse {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 14px;
+    height: 14px;
+    background: #D8A540;
+    border: 2.5px solid #0E2A22;
+    border-radius: 50%;
+    box-shadow: 0 0 0 0 rgba(216, 165, 64, 0.7);
+    animation: fmBadgePulse 2.2s infinite;
+  }
+
+  @keyframes fmBadgePulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(216, 165, 64, 0.75);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(216, 165, 64, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(216, 165, 64, 0);
+    }
+  }
+
+  /* Hover Tooltip */
+  .fm-chat-tooltip {
+    position: absolute;
+    right: 74px;
+    background: #0E2A22;
+    color: #FBFBFA;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 20px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(10px);
+    transition: all 0.22s ease;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(216, 165, 64, 0.35);
+  }
+
+  .fm-chat-circle-btn:hover .fm-chat-tooltip {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  /* ── Chat Dialog Window ────────────────────────────────────── */
+  .fm-chat-dialog {
+    position: fixed;
+    bottom: 96px;
+    right: 24px;
+    width: 395px;
+    max-width: calc(100vw - 32px);
+    height: 560px;
+    max-height: calc(100vh - 120px);
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 18px 48px rgba(14, 42, 34, 0.26), 0 4px 14px rgba(0, 0, 0, 0.08);
+    border: 1px solid #D7E3DC;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: fmDialogSlideUp 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transform-origin: bottom right;
+  }
+
+  @keyframes fmDialogSlideUp {
+    from {
+      opacity: 0;
+      transform: translateY(14px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* ── Header ────────────────────────────────────────────────── */
+  .fm-chat-header {
+    background: linear-gradient(135deg, #0E2A22 0%, #164436 60%, #1E824C 100%);
+    color: #ffffff;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(216, 165, 64, 0.25);
+    flex-shrink: 0;
+  }
+
+  .fm-chat-header-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .fm-chat-avatar {
+    width: 38px;
+    height: 38px;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1.5px solid rgba(216, 165, 64, 0.5);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .fm-online-dot {
+    position: absolute;
+    bottom: -1px;
+    right: -1px;
+    width: 10px;
+    height: 10px;
+    background: #2ecc71;
+    border: 2px solid #0E2A22;
+    border-radius: 50%;
+  }
+
+  .fm-chat-title-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .fm-chat-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .fm-chat-title-row h3 {
+    margin: 0;
+    font-size: 1.02rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+  }
+
+  .fm-badge-status {
+    background: rgba(46, 204, 113, 0.2);
+    color: #a3f7bf;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 12px;
+    border: 1px solid rgba(46, 204, 113, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .fm-chat-subtitle {
+    margin: 0;
+    font-size: 0.74rem;
+    color: rgba(255, 255, 255, 0.82);
+    font-weight: 500;
+  }
+
+  .fm-chat-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .fm-header-icon-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: rgba(255, 255, 255, 0.85);
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+  }
+
+  .fm-header-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+  }
+
+  /* ── Message Area ──────────────────────────────────────────── */
+  .fm-chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 14px;
+    background: #F8FAF8;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    scroll-behavior: smooth;
+  }
+
+  .fm-chat-messages::-webkit-scrollbar {
+    width: 6px;
+  }
+  .fm-chat-messages::-webkit-scrollbar-thumb {
+    background: #D7E3DC;
+    border-radius: 10px;
+  }
+
+  /* Message Rows */
+  .fm-message {
+    display: flex;
+    gap: 10px;
+    max-width: 88%;
+    animation: fmMsgFade 0.22s ease-out forwards;
+  }
+
+  @keyframes fmMsgFade {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fm-message-bot {
+    align-self: flex-start;
+  }
+
+  .fm-message-user {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+  }
+
+  .fm-message-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #E8F5EE;
+    border: 1px solid #D7E3DC;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .fm-message-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .fm-message-bubble {
+    padding: 11px 14px;
+    border-radius: 14px;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+
+  .fm-message-bot .fm-message-bubble {
+    background: #ffffff;
+    color: #1C2B24;
+    border: 1px solid #E3ECE6;
+    border-top-left-radius: 4px;
+    box-shadow: 0 2px 8px rgba(14, 42, 34, 0.04);
+  }
+
+  .fm-message-user .fm-message-bubble {
+    background: linear-gradient(135deg, #164436 0%, #1E824C 100%);
+    color: #ffffff;
+    border-top-right-radius: 4px;
+    box-shadow: 0 3px 10px rgba(30, 130, 76, 0.25);
+  }
+
+  .fm-message-time {
+    font-size: 0.68rem;
+    color: #8C9E94;
+    padding: 0 4px;
+  }
+  .fm-message-user .fm-message-time {
+    text-align: right;
+  }
+
+  /* Markdown Formatting in Bot Messages */
+  .fm-message-bubble p {
+    margin: 0 0 6px 0;
+  }
+  .fm-message-bubble p:last-child {
+    margin-bottom: 0;
+  }
+  .fm-message-bubble ul, .fm-message-bubble ol {
+    margin: 4px 0 6px 18px;
+    padding: 0;
+  }
+  .fm-message-bubble li {
+    margin-bottom: 3px;
+  }
+  .fm-message-bubble strong {
+    font-weight: 700;
+    color: #0E2A22;
+  }
+  .fm-message-user .fm-message-bubble strong {
+    color: #ffffff;
+  }
+
+  /* ── Suggestion Chips ──────────────────────────────────────── */
+  .fm-suggestions-container {
+    background: #ffffff;
+    border: 1px dashed #C8DCD0;
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .fm-suggestions-label {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #52665B;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .fm-chips-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .fm-chip-btn {
+    background: #E8F5EE;
+    color: #164436;
+    border: 1px solid #C4E2D2;
+    padding: 6px 10px;
+    border-radius: 18px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.18s ease;
+  }
+
+  .fm-chip-btn:hover {
+    background: #1E824C;
+    color: #ffffff;
+    border-color: #1E824C;
+    transform: translateY(-1px);
+  }
+
+  /* ── Typing Indicator ──────────────────────────────────────── */
+  .fm-typing-row {
+    display: flex;
+    gap: 10px;
+    padding: 0 14px 10px 14px;
+    background: #F8FAF8;
+    align-items: center;
+  }
+
+  .fm-typing-bubble {
+    background: #ffffff;
+    border: 1px solid #E3ECE6;
+    border-radius: 14px;
+    border-top-left-radius: 4px;
+    padding: 10px 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: 0 2px 6px rgba(14, 42, 34, 0.04);
+  }
+
+  .fm-dot {
+    width: 6px;
+    height: 6px;
+    background: #1E824C;
+    border-radius: 50%;
+    animation: fmDotBounce 1.3s infinite ease-in-out;
+  }
+  .fm-dot:nth-child(2) { animation-delay: 0.18s; }
+  .fm-dot:nth-child(3) { animation-delay: 0.36s; }
+
+  @keyframes fmDotBounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+    40% { transform: translateY(-5px); opacity: 1; }
+  }
+
+  /* ── Footer & Input Bar ────────────────────────────────────── */
+  .fm-chat-footer {
+    background: #ffffff;
+    border-top: 1px solid #E3ECE6;
+    padding: 10px 14px 8px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .fm-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #F8FAF8;
+    border: 1.5px solid #D7E3DC;
+    border-radius: 22px;
+    padding: 4px 6px 4px 14px;
+    transition: all 0.2s ease;
+  }
+
+  .fm-input-wrapper:focus-within {
+    border-color: #1E824C;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(30, 130, 76, 0.12);
+  }
+
+  .fm-chat-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 0.88rem;
+    font-family: inherit;
+    color: #1C2B24;
+    resize: none;
+    outline: none;
+    max-height: 80px;
+    line-height: 1.4;
+    padding: 6px 0;
+  }
+
+  .fm-chat-input::placeholder {
+    color: #8C9E94;
+  }
+
+  .fm-send-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #164436 0%, #1E824C 100%);
+    color: #ffffff;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .fm-send-btn:hover {
+    transform: scale(1.05);
+    background: linear-gradient(135deg, #0E2A22 0%, #164436 100%);
+  }
+
+  .fm-send-btn:disabled {
+    background: #C8DCD0;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .fm-disclaimer-note {
+    text-align: center;
+    font-size: 0.68rem;
+    color: #6C8276;
+    font-weight: 500;
+  }
+
+  /* ── Mobile Responsiveness ─────────────────────────────────── */
+  @media (max-width: 480px) {
+    .fm-chatbot-wrapper {
+      bottom: 16px;
+      right: 16px;
+    }
+    .fm-chat-dialog {
+      right: 12px;
+      left: 12px;
+      bottom: 84px;
+      width: auto;
+      max-width: none;
+      height: calc(100vh - 110px);
+    }
+    .fm-chat-circle-btn {
+      width: 56px;
+      height: 56px;
+    }
+  }
+</style>
+
+<script>
+(function() {
+  const triggerBtn = document.getElementById('fmChatTrigger');
+  const chatWindow = document.getElementById('fmChatWindow');
+  const closeBtn = document.getElementById('fmChatCloseBtn');
+  const clearBtn = document.getElementById('fmChatClearBtn');
+  const chatForm = document.getElementById('fmChatForm');
+  const chatInput = document.getElementById('fmChatInput');
+  const sendBtn = document.getElementById('fmSendBtn');
+  const messagesBox = document.getElementById('fmChatMessages');
+  const typingIndicator = document.getElementById('fmTypingIndicator');
+  const pulseBadge = document.getElementById('fmChatBadgePulse');
+  const iconOpen = triggerBtn.querySelector('.fm-icon-open');
+  const iconClose = triggerBtn.querySelector('.fm-icon-close');
+
+  let chatHistory = [];
+  let isSending = false;
+
+  // Format simple markdown into sanitized HTML
+  function formatMarkdown(text) {
+    if (!text) return '';
+    let escaped = text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+
+    // Bold **text**
+    escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    // Italic *text*
+    escaped = escaped.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+    // Bullet points
+    const lines = escaped.split('\n');
+    let inList = false;
+    let htmlLines = [];
+
+    lines.forEach(line => {
+      const trimmed = line.trim();
+      if (trimmed.startsWith('- ') || trimmed.startsWith('• ') || trimmed.startsWith('* ')) {
+        if (!inList) {
+          htmlLines.push('<ul>');
+          inList = true;
+        }
+        htmlLines.push('<li>' + trimmed.replace(/^[-•*]\s*/, '') + '</li>');
+      } else {
+        if (inList) {
+          htmlLines.push('</ul>');
+          inList = false;
+        }
+        if (trimmed.length > 0) {
+          htmlLines.push('<p>' + trimmed + '</p>');
+        }
+      }
+    });
+
+    if (inList) {
+      htmlLines.push('</ul>');
+    }
+
+    return htmlLines.join('');
+  }
+
+  function getTimeString() {
+    const now = new Date();
+    return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function scrollToBottom() {
+    messagesBox.scrollTop = messagesBox.scrollHeight;
+  }
+
+  function toggleChat(forceOpen = null) {
+    const isVisible = chatWindow.style.display !== 'none';
+    const shouldOpen = forceOpen !== null ? forceOpen : !isVisible;
+
+    if (shouldOpen) {
+      chatWindow.style.display = 'flex';
+      iconOpen.style.display = 'none';
+      iconClose.style.display = 'flex';
+      triggerBtn.setAttribute('aria-expanded', 'true');
+      if (pulseBadge) pulseBadge.style.display = 'none';
+      setTimeout(() => {
+        chatInput.focus();
+        scrollToBottom();
+      }, 100);
+    } else {
+      chatWindow.style.display = 'none';
+      iconOpen.style.display = 'flex';
+      iconClose.style.display = 'none';
+      triggerBtn.setAttribute('aria-expanded', 'false');
+    }
+  }
+
+  function appendMessage(sender, text) {
+    const row = document.createElement('div');
+    row.className = 'fm-message ' + (sender === 'user' ? 'fm-message-user' : 'fm-message-bot');
+
+    const avatar = document.createElement('div');
+    avatar.className = 'fm-message-avatar';
+    avatar.textContent = sender === 'user' ? '👤' : '🌱';
+
+    const content = document.createElement('div');
+    content.className = 'fm-message-content';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'fm-message-bubble';
+    if (sender === 'user') {
+      const p = document.createElement('p');
+      p.textContent = text;
+      bubble.appendChild(p);
+    } else {
+      bubble.innerHTML = formatMarkdown(text);
+    }
+
+    const timeSpan = document.createElement('span');
+    timeSpan.className = 'fm-message-time';
+    timeSpan.textContent = getTimeString();
+
+    content.appendChild(bubble);
+    content.appendChild(timeSpan);
+
+    row.appendChild(avatar);
+    row.appendChild(content);
+
+    messagesBox.appendChild(row);
+    scrollToBottom();
+  }
+
+  function getCsrfToken() {
+    const csrfInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+    if (csrfInput) return csrfInput.value;
+    const cookie = document.cookie.split('; ').find(row => row.startsWith('csrftoken='));
+    return cookie ? cookie.split('=')[1] : '';
+  }
+
+  async function handleSendMessage(messageText) {
+    const text = (messageText || chatInput.value).trim();
+    if (!text || isSending) return;
+
+    // Reset input
+    chatInput.value = '';
+    chatInput.style.height = 'auto';
+
+    // Show user message
+    appendMessage('user', text);
+    chatHistory.push({ role: 'user', content: text });
+
+    // Show typing
+    isSending = true;
+    sendBtn.disabled = true;
+    typingIndicator.style.display = 'flex';
+    scrollToBottom();
+
+    try {
+      const response = await fetch('/api/chatbot/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCsrfToken(),
+        },
+        body: JSON.stringify({
+          message: text,
+          history: chatHistory.slice(-6)
+        })
+      });
+
+      const data = await response.json();
+      typingIndicator.style.display = 'none';
+
+      if (data && data.reply) {
+        appendMessage('bot', data.reply);
+        chatHistory.push({ role: 'assistant', content: data.reply });
+      } else {
+        appendMessage('bot', "I am currently unable to fetch an answer. Please verify your connection or try asking again.");
+      }
+    } catch (err) {
+      typingIndicator.style.display = 'none';
+      appendMessage('bot', "Sorry, I encountered a network error connecting to our assistant. Please try again in a few moments.");
+    } finally {
+      isSending = false;
+      sendBtn.disabled = false;
+      scrollToBottom();
+      chatInput.focus();
+    }
+  }
+
+  // Event Listeners
+  triggerBtn.addEventListener('click', () => toggleChat());
+  closeBtn.addEventListener('click', () => toggleChat(false));
+
+  clearBtn.addEventListener('click', () => {
+    if (confirm('Clear chat conversation?')) {
+      chatHistory = [];
+      const messages = messagesBox.querySelectorAll('.fm-message');
+      messages.forEach((msg, idx) => {
+        if (idx > 0) msg.remove(); // keep welcome message
+      });
+      const suggestions = document.getElementById('fmSuggestions');
+      if (suggestions) suggestions.style.display = 'flex';
+    }
+  });
+
+  // Suggestion chip clicks
+  document.querySelectorAll('.fm-chip-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const query = this.getAttribute('data-query');
+      if (query) {
+        handleSendMessage(query);
+      }
+    });
+  });
+
+  // Form submit
+  chatForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    handleSendMessage();
+  });
+
+  // Enter to send, Shift+Enter for new line
+  chatInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  });
+
+  // Auto-grow textarea
+  chatInput.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 80) + 'px';
+  });
+
+  // Close on Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && chatWindow.style.display !== 'none') {
+      toggleChat(false);
+    }
+  });
+})();
+</script>

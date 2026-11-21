@@ -1,0 +1,25 @@
+﻿{% extends 'farm/base.html' %}
+{% block title %}{{ buyer.name }} – Kisan Connect{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">{{ buyer.name }}</h1>
+  <div style="display:flex;gap:8px;">
+    <a href="{% url 'buyer_update' buyer.pk %}" class="btn btn-secondary">Edit</a>
+    <a href="{% url 'buyer_delete' buyer.pk %}" class="btn btn-danger">Delete</a>
+    <a href="{% url 'buyer_list' %}" class="btn btn-secondary">← Back</a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="detail-grid">
+    <div class="detail-item"><label>Email</label><p>{{ buyer.email }}</p></div>
+    <div class="detail-item"><label>Phone</label><p>{{ buyer.phone }}</p></div>
+    <div class="detail-item"><label>Location</label><p>{{ buyer.location }}</p></div>
+    <div class="detail-item"><label>Budget</label><p>Rs. {{ buyer.budget }}</p></div>
+    <div class="detail-item" style="grid-column:1/-1;"><label>Preferred Crops</label><p>{{ buyer.preferred_crops }}</p></div>
+    <div class="detail-item"><label>Added On</label><p>{{ buyer.created_at|date:"d M Y" }}</p></div>
+  </div>
+</div>
+{% endblock %}
+

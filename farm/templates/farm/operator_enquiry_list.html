@@ -1,0 +1,91 @@
+﻿{% extends 'farm/base.html' %}
+{% block title %}Manage Purchase Enquiries – Kisan Connect{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">📬 Buyer Purchase Enquiries</h1>
+    <p style="color:#757575;font-size:.9rem;margin-top:4px;">Review, approve, or update purchase requests sent by buyers to farmers.</p>
+  </div>
+  <div style="font-size:.9rem;color:#757575;">
+    Total: <strong>{{ total_count }}</strong> | Pending: <strong style="color:#e65100;">{{ pending_count }}</strong>
+  </div>
+</div>
+
+<!-- Search and Filter Bar -->
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+  <form method="get" class="search-bar" style="margin-bottom:0;flex:1;min-width:280px;">
+    <input type="text" name="q" value="{{ q }}" placeholder="Search by crop, buyer or farmer name...">
+    {% if status_filter %}<input type="hidden" name="status" value="{{ status_filter }}">{% endif %}
+    <button type="submit" class="btn btn-primary">Search</button>
+    {% if q %}<a href="{% url 'operator_enquiry_list' %}{% if status_filter %}?status={{ status_filter }}{% endif %}" class="btn btn-secondary">Clear</a>{% endif %}
+  </form>
+
+  <div style="display:flex;gap:6px;flex-wrap:wrap;">
+    <a href="{% url 'operator_enquiry_list' %}{% if q %}?q={{ q }}{% endif %}" class="btn {% if not status_filter %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">
+      All ({{ total_count }})
+    </a>
+    {% for val, label in status_choices %}
+    <a href="?status={{ val }}{% if q %}&q={{ q }}{% endif %}" class="btn {% if status_filter == val %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">
+      {{ label }}
+    </a>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="card" style="padding:0;overflow:hidden;">
+  {% if enquiries %}
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Buyer</th>
+          <th>Crop</th>
+          <th>Farmer</th>
+          <th>Location</th>
+          <th>Required Qty</th>
+          <th>Offered Price</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for enq in enquiries %}
+        <tr>
+          <td><strong>#{{ enq.id }}</strong></td>
+          <td>
+            <strong>{% if enq.buyer.buyer_profile %}{{ enq.buyer.buyer_profile.name }}{% else %}{{ enq.buyer.username }}{% endif %}</strong><br>
+            <small style="color:#757575;">{{ enq.buyer.email }}</small>
+          </td>
+          <td><strong style="color:#1b5e20;">{{ enq.crop.name }}</strong></td>
+          <td>{{ enq.farmer.name }}</td>
+          <td>{{ enq.farmer.location }}</td>
+          <td>{{ enq.required_quantity }} {{ enq.quantity_unit }}</td>
+          <td style="font-weight:700;color:#2e7d32;">Rs. {{ enq.offered_price_per_quintal }} /Q</td>
+          <td>
+            <span class="badge badge-{{ enq.status }}">
+              {{ enq.get_status_display }}
+            </span>
+          </td>
+          <td style="font-size:.85rem;color:#757575;">{{ enq.created_at|date:"d M Y" }}</td>
+          <td style="white-space:nowrap;">
+            <a href="{% url 'operator_enquiry_detail' enq.pk %}" class="btn btn-secondary btn-sm">Review & Update</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="icon">📬</div>
+    <p>{% if status_filter or q %}No purchase enquiries match your search filters.{% else %}No buyer purchase enquiries received yet.{% endif %}</p>
+    {% if status_filter or q %}
+    <a href="{% url 'operator_enquiry_list' %}" class="btn btn-secondary">Clear Filters</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends 'farm/base.html' %}
+{% block title %}Send Purchase Enquiry – {{ crop.name }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Submit Purchase Enquiry</h1>
+    <p style="color:#757575;font-size:.9rem;margin-top:4px;">Direct your purchase requirements and price offer for this crop listing.</p>
+  </div>
+  <a href="{% url 'buyer_crop_list' %}" class="btn btn-secondary">← Back to Crops</a>
+</div>
+
+<!-- Crop Details Summary Card -->
+<div class="card" style="margin-bottom:20px;border-left:4px solid #2e7d32;">
+  <h2 style="font-size:1.15rem;color:#1b5e20;margin-bottom:12px;">Crop & Farmer Information</h2>
+  <div class="detail-grid">
+    <div class="detail-item"><label>Crop Name</label><p><strong>{{ crop.name }}</strong></p></div>
+    <div class="detail-item"><label>Farmer</label><p><strong>{{ farmer.name }}</strong></p></div>
+    <div class="detail-item"><label>District / State</label><p>{{ farmer.district|default:"-" }}, {{ farmer.state|default:"-" }}</p></div>
+    <div class="detail-item"><label>Season</label><p><span class="badge badge-green">{{ crop.get_season_display }}</span></p></div>
+    <div class="detail-item"><label>Expected Yield</label><p><strong>{{ crop.expected_yield }} Quintals</strong></p></div>
+    <div class="detail-item"><label>Expected Price</label><p style="font-weight:700;color:#2e7d32;">Rs. {{ crop.expected_price }} per Quintal</p></div>
+    <div class="detail-item"><label>Harvest Date</label><p>{{ crop.harvest_date|date:"d M Y" }}</p></div>
+  </div>
+</div>
+
+<!-- Enquiry Form Card -->
+<div class="card" style="max-width:680px;">
+  <h2 style="font-size:1.15rem;color:#1b5e20;margin-bottom:16px;">Your Purchase Offer</h2>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="form-group">
+        <label for="{{ form.required_quantity.id_for_label }}">Required Quantity *</label>
+        {{ form.required_quantity }}
+        {% if form.required_quantity.errors %}
+        <ul class="errorlist">{% for e in form.required_quantity.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.quantity_unit.id_for_label }}">Quantity Unit *</label>
+        {{ form.quantity_unit }}
+        {% if form.quantity_unit.errors %}
+        <ul class="errorlist">{% for e in form.quantity_unit.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="{{ form.offered_price_per_quintal.id_for_label }}">Offered Price per Quintal (INR) *</label>
+      {{ form.offered_price_per_quintal }}
+      <p class="help-text">Specify the maximum price you are offering to pay per quintal (100 kg).</p>
+      {% if form.offered_price_per_quintal.errors %}
+      <ul class="errorlist">{% for e in form.offered_price_per_quintal.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+      {% endif %}
+    </div>
+
+    <div class="form-group">
+      <label for="{{ form.message.id_for_label }}">Message & Purchase Terms</label>
+      {{ form.message }}
+      <p class="help-text">Mention transportation requirements, packaging preferences, or questions for the operator/farmer.</p>
+      {% if form.message.errors %}
+      <ul class="errorlist">{% for e in form.message.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+      {% endif %}
+    </div>
+
+    <div style="display:flex;gap:12px;margin-top:20px;">
+      <button type="submit" class="btn btn-primary" style="padding:10px 24px;font-size:1rem;">
+        Submit Purchase Enquiry
+      </button>
+      <a href="{% url 'buyer_crop_list' %}" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+

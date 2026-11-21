@@ -1,0 +1,935 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Kisan Connect – Agricultural Management & Price Discovery Platform{% endblock %}</title>
+
+<!-- Google Font: Plus Jakarta Sans -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  /* ── Color Palette & Variables ────────────────────────────── */
+  :root {
+    --forest:        #0E2A22; /* Deeper, richer forest green */
+    --forest-mid:    #164436;
+    --forest-dark:   #091D17;
+    --emerald:       #1E824C; /* Fresh, vibrant agritech emerald */
+    --emerald-dark:  #145A32;
+    --emerald-light: #E8F5EE;
+    --sage:          #EBF3EC; /* Clean soft sage */
+    --cream:         #FBFBFA; /* Pristine subtle warm tint */
+    --gold:          #D8A540; /* Radiant harvest gold */
+    --gold-dark:     #B8862D;
+    --gold-light:    #FFF8E6;
+    --charcoal:      #1C2B24;
+
+    --green:         #1E824C;
+    --green-dark:    #0E2A22;
+    --green-light:   #E8F5EE;
+    --green-mid:     #279659;
+    --accent:        #D8A540;
+    --danger:        #c62828;
+    --danger-light:  #ffebee;
+    --text:          #1C2B24;
+    --text-muted:    #52665B;
+    --border:        #D7E3DC;
+    --border-light:  #E8EFEA;
+    --bg:            #F8FAF8;
+    --white:         #ffffff;
+    --shadow-sm:     0 2px 8px rgba(14, 42, 34, 0.05);
+    --shadow:        0 6px 20px rgba(14, 42, 34, 0.07);
+    --shadow-md:     0 12px 30px rgba(14, 42, 34, 0.10);
+    --shadow-lg:     0 20px 48px rgba(14, 42, 34, 0.14);
+    --radius:        10px;
+    --radius-lg:     16px;
+  }
+
+  /* ── Reset & Typography ─────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--emerald); text-decoration: none; transition: color .2s; }
+  a:hover { color: var(--forest); text-decoration: none; }
+
+  /* ── Navigation Bar ────────────────────────────────────────── */
+  nav {
+    background: var(--forest);
+    color: var(--white);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    border-bottom: 1px solid rgba(214, 170, 85, 0.25);
+    box-shadow: 0 4px 16px rgba(23, 63, 53, 0.25);
+  }
+
+  .nav-container {
+    width: 100%;
+    max-width: 100%;
+    padding: 0 32px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .nav-brand {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: -0.01em;
+    flex-shrink: 0;
+  }
+  .nav-brand:hover { color: #ffffff; text-decoration: none; }
+  .nav-brand .brand-icon {
+    font-size: 1.4rem;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,.2));
+  }
+  .nav-brand .brand-accent {
+    color: var(--gold);
+    font-weight: 700;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+  }
+
+  .nav-links a {
+    color: rgba(248, 247, 241, 0.88);
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: .92rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    transition: all .2s ease;
+    position: relative;
+  }
+
+  .nav-links a:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    text-decoration: none;
+  }
+
+  .nav-links a.active {
+    background: rgba(40, 122, 82, 0.45);
+    color: #ffffff;
+    box-shadow: inset 0 -2px 0 var(--gold);
+  }
+
+  /* ── Dropdown ──────────────────────────────────────────────── */
+  .nav-dropdown { position: relative; display: inline-flex; align-items: center; }
+  .nav-dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: #13332b;
+    min-width: 180px;
+    box-shadow: 0 10px 28px rgba(0,0,0,.35);
+    border: 1px solid rgba(214, 170, 85, 0.2);
+    border-radius: 8px;
+    z-index: 1000;
+    overflow: hidden;
+    padding: 6px 0;
+  }
+  .nav-dropdown:hover .nav-dropdown-content { display: block; }
+  .nav-dropdown-content a {
+    color: rgba(255,255,255,.9) !important;
+    padding: 10px 16px !important;
+    display: block !important;
+    font-size: .88rem !important;
+    white-space: nowrap;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+  .nav-dropdown-content a:hover {
+    background: rgba(40, 122, 82, 0.4) !important;
+    color: #fff !important;
+  }
+
+  /* ── User Profile Tab in Navbar ───────────────────────────── */
+  .nav-user-pill {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px 6px 8px !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid rgba(214, 170, 85, 0.35);
+    border-radius: 999px !important;
+    color: #ffffff !important;
+    font-size: .88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s ease;
+    text-decoration: none !important;
+  }
+
+  .nav-user-pill:hover,
+  .nav-user-pill.active {
+    background: rgba(40, 122, 82, 0.55) !important;
+    border-color: var(--gold);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+    color: #ffffff !important;
+  }
+
+  .user-avatar-badge {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold) 0%, #b8862d 100%);
+    color: #173F35;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: .78rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.18);
+    flex-shrink: 0;
+  }
+
+  .user-name-text {
+    max-width: 140px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0.01em;
+  }
+
+  /* ── Mobile Hamburger ──────────────────────────────────────── */
+  .nav-toggle {
+    display: none;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .nav-toggle span {
+    display: block;
+    width: 24px;
+    height: 2.5px;
+    background: #ffffff;
+    border-radius: 2px;
+    transition: all .25s ease;
+  }
+
+  @media (max-width: 820px) {
+    .nav-toggle { display: flex; }
+    .nav-links {
+      display: none;
+      position: absolute;
+      top: 64px;
+      left: 0;
+      right: 0;
+      background: var(--forest);
+      flex-direction: column;
+      padding: 16px 20px;
+      gap: 6px;
+      border-bottom: 2px solid var(--gold);
+      box-shadow: 0 12px 28px rgba(0,0,0,.3);
+    }
+    .nav-links.show { display: flex; }
+    .nav-links a { width: 100%; padding: 10px 14px; }
+    .nav-dropdown { width: 100%; flex-direction: column; align-items: flex-start; }
+    .nav-dropdown-content { position: static; width: 100%; box-shadow: none; border: none; background: rgba(0,0,0,.15); padding: 4px 12px; }
+    .nav-user-pill { width: 100%; border-radius: 8px !important; }
+  }
+
+  /* ── Main Layouts ──────────────────────────────────────────── */
+  .main-container {
+    flex: 1;
+    padding: 36px 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .main-fullwidth {
+    flex: 1;
+    padding: 0;
+    width: 100%;
+  }
+
+  /* ── Right-Side Floating Toast Notifications ────────────────── */
+  .toast-container {
+    position: fixed;
+    top: 76px;
+    right: 24px;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 400px;
+    width: calc(100% - 48px);
+    pointer-events: none;
+  }
+
+  .toast-message {
+    pointer-events: auto;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(23, 63, 53, 0.16), 0 2px 8px rgba(0,0,0,0.06);
+    border: 1px solid rgba(23, 63, 53, 0.1);
+    padding: 13px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: toastSlideIn .32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transition: opacity .25s ease, transform .25s ease;
+  }
+
+  @keyframes toastSlideIn {
+    from {
+      opacity: 0;
+      transform: translateX(45px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .toast-message.toast-hiding {
+    opacity: 0;
+    transform: translateX(45px);
+  }
+
+  .toast-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .toast-content {
+    flex: 1;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--charcoal);
+    line-height: 1.4;
+  }
+
+  .toast-close {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1.25rem;
+    color: var(--text-muted);
+    padding: 2px 6px;
+    line-height: 1;
+    border-radius: 4px;
+    transition: color .2s ease;
+    flex-shrink: 0;
+  }
+  .toast-close:hover {
+    color: var(--forest);
+  }
+
+  .toast-message.success {
+    border-left: 4px solid var(--emerald);
+  }
+  .toast-message.success .toast-icon {
+    background: var(--sage);
+    color: var(--emerald);
+  }
+
+  .toast-message.error, .toast-message.danger {
+    border-left: 4px solid var(--danger);
+  }
+  .toast-message.error .toast-icon, .toast-message.danger .toast-icon {
+    background: var(--danger-light);
+    color: var(--danger);
+  }
+
+  .toast-message.warning {
+    border-left: 4px solid var(--gold);
+  }
+  .toast-message.warning .toast-icon {
+    background: #fff8e1;
+    color: #b28704;
+  }
+
+  .toast-message.info {
+    border-left: 4px solid #1976d2;
+  }
+  .toast-message.info .toast-icon {
+    background: #e3f2fd;
+    color: #1565c0;
+  }
+
+  /* ── Page Header ─────────────────────────────────────────── */
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .page-title {
+    font-size: 1.7rem;
+    font-weight: 800;
+    color: var(--forest);
+    letter-spacing: -0.02em;
+  }
+
+  /* ── Buttons ──────────────────────────────────────────────── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: .92rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all .2s ease;
+    text-decoration: none;
+    line-height: 1.2;
+  }
+  .btn-primary   { background: var(--emerald); color: #fff; }
+  .btn-primary:hover { background: var(--forest); color: #fff; box-shadow: 0 4px 12px rgba(40,122,82,.25); }
+  .btn-secondary { background: #fff; color: var(--forest); border: 1.5px solid var(--border); }
+  .btn-secondary:hover { background: var(--sage); color: var(--forest); border-color: var(--emerald); }
+  .btn-danger    { background: var(--danger); color: #fff; }
+  .btn-danger:hover { background: #9e1c1c; color: #fff; }
+  .btn-sm { padding: 6px 14px; font-size: .84rem; border-radius: 6px; }
+
+  /* ── Card ─────────────────────────────────────────────────── */
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    padding: 26px;
+    margin-bottom: 24px;
+  }
+
+  /* ── Table ────────────────────────────────────────────────── */
+  .table-wrapper { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 13px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { background: var(--sage); color: var(--forest); font-weight: 700; font-size: .88rem; text-transform: uppercase; letter-spacing: .03em; }
+  tr:hover td { background: rgba(231, 240, 232, 0.25); }
+
+  .badge {
+    display: inline-block;
+    padding: 4px 11px;
+    border-radius: 20px;
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .02em;
+  }
+  .badge-green  { background: var(--sage); color: var(--forest); }
+  .badge-yellow { background: #fff9c4; color: #795548; }
+  .badge-blue   { background: #e3f2fd; color: #1565c0; }
+  .badge-orange { background: #fff3e0; color: #e65100; }
+  .badge-pending   { background: #fff8e1; color: #b78103; border: 1px solid #ffe082; }
+  .badge-accepted  { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+  .badge-rejected  { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+  .badge-completed { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
+
+  /* ── Search Bar ───────────────────────────────────────────── */
+  .search-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .search-bar input, .search-bar select {
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: .92rem;
+    background: var(--white);
+    color: var(--text);
+  }
+  .search-bar input:focus, .search-bar select:focus {
+    outline: none;
+    border-color: var(--emerald);
+    box-shadow: 0 0 0 3px rgba(40,122,82,.14);
+  }
+
+  /* ── Form ─────────────────────────────────────────────────── */
+  .form-group { margin-bottom: 18px; }
+  .form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--forest);
+    font-size: .9rem;
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: .95rem;
+    font-family: inherit;
+    transition: border-color .2s;
+    background: #fff;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--emerald);
+    box-shadow: 0 0 0 3px rgba(40,122,82,.12);
+  }
+  .form-group .help-text { font-size: .8rem; color: var(--text-muted); margin-top: 5px; }
+  .errorlist { color: var(--danger); font-size: .85rem; list-style: none; margin-top: 5px; }
+
+  /* ── Dashboard Stat Cards ─────────────────────────────────── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 18px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 22px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border-top: 4px solid var(--emerald);
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .stat-card .label { font-size: .85rem; color: var(--text-muted); font-weight: 600; }
+  .stat-card .value { font-size: 2.1rem; font-weight: 800; color: var(--forest); }
+
+  /* ── Empty State ──────────────────────────────────────────── */
+  .empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--text-muted);
+  }
+  .empty-state .icon { font-size: 2.8rem; margin-bottom: 12px; }
+  .empty-state p { margin-bottom: 16px; font-size: .95rem; }
+
+  /* ── Detail view ──────────────────────────────────────────── */
+  .detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .detail-item label { font-size: .78rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+  .detail-item p { font-size: 1rem; color: var(--charcoal); margin-top: 3px; font-weight: 500; }
+
+  /* ── Extended Professional Footer ──────────────────────────── */
+  footer.site-footer {
+    background: #0B241D;
+    color: rgba(248, 247, 241, 0.88);
+    border-top: 3px solid var(--gold);
+    margin-top: auto;
+    padding: 68px 0 28px 0;
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+
+  .footer-container {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1.1fr 1.2fr 1.5fr;
+    gap: 48px;
+    margin-bottom: 48px;
+  }
+
+  .footer-brand {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .footer-brand .footer-brand-icon {
+    font-size: 1.5rem;
+  }
+
+  .footer-brand .footer-brand-accent {
+    color: var(--gold);
+  }
+
+  .footer-tagline {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 12px;
+    letter-spacing: 0.01em;
+  }
+
+  .footer-description {
+    font-size: 0.88rem;
+    color: rgba(248, 247, 241, 0.72);
+    line-height: 1.65;
+    margin-bottom: 18px;
+  }
+
+  .footer-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .footer-pill {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(214, 170, 85, 0.35);
+    color: var(--cream);
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+
+  .footer-col-title {
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 18px;
+    position: relative;
+    padding-bottom: 8px;
+  }
+
+  .footer-col-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 28px;
+    height: 2px;
+    background: var(--gold);
+    border-radius: 2px;
+  }
+
+  .footer-links {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0;
+    margin: 0;
+  }
+
+  .footer-links li a,
+  .footer-links li span {
+    color: rgba(248, 247, 241, 0.75);
+    font-size: 0.88rem;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .footer-links li a:hover {
+    color: var(--gold);
+    transform: translateX(3px);
+  }
+
+  .footer-contact-info {
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.82rem;
+    color: rgba(248, 247, 241, 0.75);
+    line-height: 1.6;
+  }
+
+  .footer-contact-info strong {
+    color: #ffffff;
+  }
+
+  .footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 24px;
+  }
+
+  .footer-bottom-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 0.84rem;
+    color: rgba(248, 247, 241, 0.65);
+  }
+
+  .footer-bottom-content strong {
+    color: var(--gold);
+  }
+
+  .footer-bottom-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(248, 247, 241, 0.75);
+  }
+
+  .footer-bottom-badge .separator {
+    color: var(--gold);
+  }
+
+  @media (max-width: 992px) {
+    .footer-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 36px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .footer-grid {
+      grid-template-columns: 1fr;
+      gap: 30px;
+    }
+    .footer-bottom-content {
+      flex-direction: column;
+      text-align: center;
+      gap: 8px;
+    }
+  }
+</style>
+{% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<!-- Navigation Bar -->
+<nav>
+  <div class="nav-container">
+    <a class="nav-brand" href="{% url 'home' %}">
+      <span>Kisan<span class="brand-accent">Connect</span></span>
+    </a>
+
+    <button class="nav-toggle" id="navToggle" type="button" aria-label="Toggle navigation">
+      <span></span><span></span><span></span>
+    </button>
+
+    <div class="nav-links">
+      {% if user.is_authenticated %}
+        {% if user.is_superuser or user.is_staff or user.profile.role == 'operator' %}
+          <a href="{% url 'home' %}" {% if request.path == '/' %}class="active"{% endif %}>Home</a>
+          <a href="{% url 'farmer_list' %}" {% if '/farmers/' in request.path %}class="active"{% endif %}>Farmers</a>
+          <div class="nav-dropdown">
+            <a href="{% url 'crop_list' %}" {% if '/crops/' in request.path and not '/buyer/' in request.path %}class="active"{% endif %}>Crops ▾</a>
+            <div class="nav-dropdown-content">
+              <a href="{% url 'crop_list' %}">🌱 All Crops</a>
+              <a href="{% url 'operator_enquiry_list' %}">📬 Crop Enquiries</a>
+            </div>
+          </div>
+          <a href="{% url 'buyer_list' %}" {% if '/buyers/' in request.path and not '/buyer/' in request.path %}class="active"{% endif %}>Buyers</a>
+          <a href="{% url 'market_crop_prices' %}" {% if '/market-crop-prices/' in request.path %}class="active"{% endif %}>Market Crop Prices</a>
+          <a href="{% url 'profile' %}" class="nav-user-pill {% if '/profile/' in request.path %}active{% endif %}" title="View Profile">
+            <span class="user-avatar-badge">{{ user.first_name|default:user.username|make_list|first|upper }}</span>
+            <span class="user-name-text">{{ user.first_name|default:user.username }}</span>
+          </a>
+        {% else %}
+          <a href="{% url 'home' %}" {% if request.path == '/' %}class="active"{% endif %}>Home</a>
+          <a href="{% url 'buyer_crop_list' %}" {% if '/buyer/crops/' in request.path %}class="active"{% endif %}>Browse Crops</a>
+          <a href="{% url 'market_crop_prices' %}" {% if '/market-crop-prices/' in request.path %}class="active"{% endif %}>Market Crop Prices</a>
+          <a href="{% url 'buyer_enquiry_list' %}" {% if '/buyer/enquiries/' in request.path %}class="active"{% endif %}>My Enquiries</a>
+          <a href="{% url 'profile' %}" class="nav-user-pill {% if '/profile/' in request.path or '/buyer/profile/' in request.path %}active{% endif %}" title="View Profile">
+            <span class="user-avatar-badge">{{ user.first_name|default:user.username|make_list|first|upper }}</span>
+            <span class="user-name-text">{{ user.first_name|default:user.username }}</span>
+          </a>
+        {% endif %}
+      {% else %}
+        <a href="{% url 'home' %}" {% if request.path == '/' %}class="active"{% endif %}>Home</a>
+        <a href="{% url 'buyer_crop_list' %}" {% if '/buyer/crops/' in request.path %}class="active"{% endif %}>Browse Crops</a>
+        <a href="{% url 'market_crop_prices' %}" {% if '/market-crop-prices/' in request.path %}class="active"{% endif %}>Market Crop Prices</a>
+        <a href="{% url 'login' %}" {% if '/login/' in request.path %}class="active"{% endif %}>Login</a>
+        <a href="{% url 'register' %}" {% if '/register/' in request.path %}class="active"{% endif %}>Register</a>
+      {% endif %}
+    </div>
+  </div>
+</nav>
+
+{% if messages %}
+<div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true">
+  {% for message in messages %}
+  <div class="toast-message {{ message.tags }}">
+    <div class="toast-icon">
+      {% if 'success' in message.tags %}✓{% elif 'error' in message.tags or 'danger' in message.tags %}✕{% elif 'warning' in message.tags %}⚠{% else %}ℹ{% endif %}
+    </div>
+    <div class="toast-content">{{ message }}</div>
+    <button type="button" class="toast-close" onclick="dismissToast(this)" aria-label="Dismiss">&times;</button>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<main class="{% block main_class %}main-container{% endblock %}">
+  {% block content %}{% endblock %}
+</main>
+
+<!-- Extended Professional Footer -->
+<footer class="site-footer">
+  <div class="footer-container">
+    <div class="footer-grid">
+      <!-- Col 1: Brand & Mission -->
+      <div class="footer-col brand-col">
+        <div class="footer-brand">
+          <span>Kisan<span class="footer-brand-accent">Connect</span></span>
+        </div>
+        <p class="footer-tagline">
+          Empowering Farmers. Connecting Markets. Growing Futures.
+        </p>
+        <p class="footer-description">
+          A modern agricultural management and transparent price discovery platform connecting verified farmers, agricultural officers, and commercial buyers across India.
+        </p>
+        <div class="footer-badges">
+          <span class="footer-pill">🌱 Direct Farm Trade</span>
+          <span class="footer-pill">📊 APMC Benchmark</span>
+        </div>
+      </div>
+
+      <!-- Col 2: Navigation Links -->
+      <div class="footer-col">
+        <h4 class="footer-col-title">Navigation</h4>
+        <ul class="footer-links">
+          <li><a href="{% url 'home' %}">Home</a></li>
+          <li><a href="{% url 'buyer_crop_list' %}">Browse Crops</a></li>
+          <li><a href="{% url 'market_crop_prices' %}">Market Crop Prices</a></li>
+          {% if user.is_authenticated %}
+            <li><a href="{% url 'profile' %}">My Profile</a></li>
+          {% else %}
+            <li><a href="{% url 'login' %}">Login</a></li>
+            <li><a href="{% url 'register' %}">Register Account</a></li>
+          {% endif %}
+        </ul>
+      </div>
+
+      <!-- Col 3: Agricultural Management -->
+      <div class="footer-col">
+        <h4 class="footer-col-title">Platform Features</h4>
+        <ul class="footer-links">
+          <li><span>Farmer Registration</span></li>
+          <li><span>Seasonal Crop Registry</span></li>
+          <li><span>Wholesale Price Discovery</span></li>
+          <li><span>Direct Purchase Enquiries</span></li>
+          <li><span>State &amp; District Mapping</span></li>
+        </ul>
+      </div>
+
+      <!-- Col 4: Trust & Assistance -->
+      <div class="footer-col">
+        <h4 class="footer-col-title">Support &amp; Trust</h4>
+        <ul class="footer-links">
+          <li><span>APMC Guidelines</span></li>
+          <li><span>Fair Trade Assurance</span></li>
+          <li><span>Verified Produce Standards</span></li>
+          <li><span>Privacy Policy</span></li>
+          <li><span>Terms of Service</span></li>
+        </ul>
+        <div class="footer-contact-info">
+          <p><strong>Support Desk:</strong> support@kisanconnect.in</p>
+          <p><strong>Working Hours:</strong> Mon &ndash; Sat: 9:00 AM &ndash; 6:00 PM</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Bottom Divider & Copyright -->
+    <div class="footer-bottom">
+      <div class="footer-bottom-content">
+        <p>&copy; 2026 <strong>Kisan Connect</strong> &mdash; Agricultural Management &amp; Price Discovery Platform. All rights reserved.</p>
+        <p class="footer-bottom-badge">
+          <span>🇮🇳 Built for Indian Agriculture</span>
+          <span class="separator">&bull;</span>
+          <span>Transparent &bull; Reliable &bull; Direct</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Mobile navigation hamburger toggle
+  const navToggle = document.getElementById('navToggle');
+  const navLinks = document.querySelector('.nav-links');
+  if (navToggle && navLinks) {
+    navToggle.addEventListener('click', function() {
+      navLinks.classList.toggle('show');
+    });
+  }
+
+  // Toast dismissal helper
+  function dismissToast(btn) {
+    const toast = btn.closest('.toast-message');
+    if (!toast) return;
+    toast.classList.add('toast-hiding');
+    setTimeout(() => {
+      toast.remove();
+      const container = document.getElementById('toastContainer');
+      if (container && container.children.length === 0) {
+        container.remove();
+      }
+    }, 250);
+  }
+
+  // Auto-dismiss toasts after 5 seconds
+  document.addEventListener('DOMContentLoaded', function() {
+    const toasts = document.querySelectorAll('.toast-message');
+    toasts.forEach((toast, idx) => {
+      setTimeout(() => {
+        if (toast && toast.parentElement) {
+          toast.classList.add('toast-hiding');
+          setTimeout(() => {
+            toast.remove();
+            const container = document.getElementById('toastContainer');
+            if (container && container.children.length === 0) {
+              container.remove();
+            }
+          }, 250);
+        }
+      }, 5000 + (idx * 400));
+    });
+  });
+</script>
+
+<!-- Floating Groq AI Chatbot Widget -->
+{% include 'farm/chatbot_widget.html' %}
+
+</body>
+</html>
